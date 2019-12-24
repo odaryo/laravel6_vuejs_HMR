@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  # laravel
+  app:
+    build:
+      context: ./
+      dockerfile: ./docker/app/Dockerfile
+    depends_on:
+      - db
+    links:
+      - db
+    volumes:
+      - ./app:/app:cached
+      - ./docker/app/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+      - ./docker/app/conf.d/php_settings.ini:/usr/local/etc/php/conf.d/php_settings.ini
+    command: bash -c "php artisan serve --host 0.0.0.0"
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+
+  # DB (mysql)
+  db:
+    image: mysql:8
+    environment:
+      - MYSQL_DATABASE=testdb
+      - MYSQL_USER=testuser
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root
+      - TZ=Asia/Tokyo
+    restart: always
+    volumes:
+      - dev_mysql_data:/var/lib/mysql
+    ports:
+      - "33306:3306"
+
+volumes:
+  dev_mysql_data:
+    driver: local
